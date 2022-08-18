@@ -30,7 +30,15 @@ contract Marketplace is ReentrancyGuard{
         uint price,
         address indexed seller
     );
-
+    //an event thats is triggered whenever an item is bought from the marketplace
+    event Bought(
+        uint itemId,
+        address indexed nft,
+        uint tokenId,
+        uint price,
+        address indexed seller,
+        address indexed buyer
+    );
     
     //mapping the itemId to the item
     mapping(uint => Item) public items;
@@ -58,6 +66,37 @@ contract Marketplace is ReentrancyGuard{
         );
         emit Offered(itemCount, address(_nft), _tokenId, _price, msg.sender);
     }
+
+    //function for purchasing item in the marketplace
+    function purchaseItem(uint _itemId) external payable nonReentrant{
+        //get the total price
+        uint _totalPrice = getTotalPrice(_itemId);
+        //get the item
+        Item storage item = items[_itemId];
+        require(_itemId > 0 && _itemId <= itemCount, "item doesnt exist");//check to make sure the item being bought exists
+        require(msg.value >= _totalPrice, "You dont have enough ether to buy this nft");//check that the persomn buying is sending enough ether
+        require(!item.sold, "item has already been sold");
+
+        //pay seller and feeAccount
+        item.seller.transfer(item.price);
+        feeAccount.transfer(_totalPrice - item.price);
+
+        //update item to sold
+        item.sold = true;
+
+        //transfer nft to buyer
+        item.nft.transferFrom(address(this), msg.sender, item.tokenId);
+
+        //emit Bought event
+
+        emit Bought(itemCount, address(item.nft), item.tokenId, item.price, item.seller, msg.sender);
+
+    }
+    
+    //a function that gets the price of the nft with the fees added
+    function getTotalPrice(uint _itemId) view public returns(uint){
+        return(items[_itemId].price * (100 + feePercent)/100);
+    } 
     
 
 }
