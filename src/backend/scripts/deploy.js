@@ -1,3 +1,5 @@
+const { ethers, artifacts } = require('ethers');
+
 async function main() {
 
   const [deployer] = await ethers.getSigners();
