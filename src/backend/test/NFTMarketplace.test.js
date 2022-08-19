@@ -1,3 +1,6 @@
+/* eslint-disable jest/valid-expect */
+/* eslint-disable jest/valid-describe-callback */
+/* eslint-disable no-undef */
 
 const { expect } = require('chai');
 const toWei = (num) => ethers.utils.parseEther(num.toString());
@@ -89,6 +92,9 @@ describe("NFTMarketplace", async() =>{
         
     })
     describe("Purchasing marketplace items", () => {
+        let price = 2;
+        let fee = (feePercent /100) * price;
+        let totalPriceInWei;
         beforeEach(async() => {
             //addr1 mints an nft
             await nft.connect(addr1).mint(URI);
@@ -97,13 +103,13 @@ describe("NFTMarketplace", async() =>{
             //addr1 lists item on the marketplace for a price of 2 eth
             await marketplace.connect(addr1).createItem(nft.address, 1, toWei(price));
         })
-        it("Should update item as sold, pay seller, transfer nft to buyer, charge fees and emit abought event", async() => {
+        it("Should update item as sold, pay seller, transfer nft to buyer, charge fees and emit a bought event", async() => {
             //get initial balances
             const sellerInitialBalance = await addr1.getBalance();
             const feeAccountInitialBalance = await deployer.getBalance();
 
             //fetch total price for the item
-            let totalPriceInWei = await marketplace.getTotalPrice(1);
+            totalPriceInWei = await marketplace.getTotalPrice(1);
             //addr2 buys the item
             await expect(marketplace.connect(addr2).purchaseItem(1, {value: totalPriceInWei})).
             to.emit(marketplace, "Bought").
@@ -122,33 +128,34 @@ describe("NFTMarketplace", async() =>{
             const sellerFinalBalance = await addr1.getBalance();
             const feeAccountFinalBalance = await deployer.getBalance();
 
-            //calculate fee
-            const fee = (feePercent / 100 * price)
 
-            // //expect the seller to receive funds a
-            // expect(fromWei(sellerFinalBalance)).to.equal(price + fromWei(sellerInitialBalance));
+
+            //expect the seller to receive funds a
+            expect(+fromWei(sellerFinalBalance)).to.equal(+price + +fromWei(sellerInitialBalance));
             //expect feeAccount to receive fees
-            // expect(fromWei(feeAccountFinalBalance)).to.equal(fromWei(feeAccountInitialBalance) + (fromWei(totalPriceInWei) - price));
+            expect(+fromWei(feeAccountFinalBalance)).to.equal(+fee + + fromWei(feeAccountInitialBalance));
             //expect the buyer to now own the nft
             expect (await nft.ownerOf(1)).to.equal(addr2.address);
 
         })
         it("Should fail for wrong item id, insufficient ether, and sold item", async() =>{
             //check for insufficient ether
-            await expect(marketplace.connect(addr2).purchaseItem(1, {value: toWei(0.5)})).
+            await expect(marketplace.connect(addr2).purchaseItem(1, {value: toWei(price)})).
                     to.be.revertedWith("You dont have enough ether to buy this nft");
             //check for wrong item id
-            await expect(marketplace.connect(addr2).purchaseItem(10, {value: toWei(2)})).
+            await expect(marketplace.connect(addr2).purchaseItem(10, {value: totalPriceInWei})).
                     to.be.revertedWith("item doesnt exist");
+
             //check for sold item
+
             //addr2 buys the item
-            await marketplace.connect(addr2).purchaseItem(1, {value: toWei(2)});
+            await marketplace.connect(addr2).purchaseItem(1, {value: totalPriceInWei});
             //addr2 tries to buy again
-            await expect(marketplace.connect(addr2).purchaseItem(1, {value: toWei(2)})).
+            await expect(marketplace.connect(addr2).purchaseItem(1, {value: totalPriceInWei})).
                     to.be.revertedWith("item has already been sold");
 
         })
     })                                  
-                                 
+                              
 
 })
