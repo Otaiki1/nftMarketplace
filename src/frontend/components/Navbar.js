@@ -31,7 +31,7 @@ const Navigation = ({ web3Handler, account }) => {
 
                             </Nav.Link>
                         ) : (
-                            <Button onClick={web3Handler} variant="outline-light">Connect Wallet</Button>
+                            <Button onClick={() => web3Handler()} variant="outline-light">Connect Wallet</Button>
                         )}
                     </Nav>
                 </Navbar.Collapse>

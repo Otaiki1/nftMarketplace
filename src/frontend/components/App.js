@@ -46,7 +46,7 @@ function App() {
 
   return (
     <BrowserRouter>
-    <div>
+    <div className='App'>
       <Navigation web3Handler={web3Handler} account={account} />
       {loading ? (
          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
@@ -55,10 +55,12 @@ function App() {
        </div>
       ):(
         <Routes>
-          <Route path="/" element={} />
-          <Route path="/create" element={} />
-          <Route path="/my-listed-items" element={} />
-          <Route path="/my-purchases" element={} />
+          <Route path="/" element={
+            <Home marketplace={marketplace} nft={NFT}/>
+          } />
+          <Route path="/create" />
+          <Route path="/my-listed-items" />
+          <Route path="/my-purchases" />
       </Routes>
       )}
       

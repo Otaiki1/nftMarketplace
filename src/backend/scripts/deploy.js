@@ -1,4 +1,4 @@
-const { ethers, artifacts } = require('ethers');
+
 
 async function main() {
 
