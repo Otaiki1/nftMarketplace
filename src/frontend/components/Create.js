@@ -1,14 +1,30 @@
 import { useState } from 'react'
 import { ethers } from "ethers"
 import { Row, Form, Button } from 'react-bootstrap'
-import { create as ipfsHttpClient } from 'ipfs-http-client'
-const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
+// import { create as ipfsHttpClient } from 'ipfs-http-client'
 
+import { Buffer } from 'buffer';
+const ipfsClient = require('ipfs-http-client');
+const projectId = '2DmS9CrnVeU2Caun612yGaPQ2aq';
+const projectSecret = '5c06e22765f9f65e1e9ea4af53131e83';
+const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+const client = ipfsClient.create({
+  host: 'ipfs.infura.io',
+  port: 5001,
+  protocol: 'https',
+  headers: {
+    authorization: auth,
+  },
+});
 const Create = ({ marketplace, nft }) => {
   const [image, setImage] = useState('')
   const [price, setPrice] = useState(null)
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
+  const [name, 	setName] = useState('')
+  const [description, setDescription] = useState('');
+
+
+
+
   const uploadToIPFS = async (event) => {
     event.preventDefault()
     const file = event.target.files[0]
@@ -41,7 +57,7 @@ const Create = ({ marketplace, nft }) => {
     await(await nft.setApprovalForAll(marketplace.address, true)).wait()
     // add nft to marketplace
     const listingPrice = ethers.utils.parseEther(price.toString())
-    await(await marketplace.makeItem(nft.address, id, listingPrice)).wait()
+    await(await marketplace.createItem(nft.address, id, listingPrice)).wait()
   }
   return (
     <div className="container-fluid mt-5">
