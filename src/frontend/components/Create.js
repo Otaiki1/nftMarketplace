@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ethers } from "ethers"
 import { Row, Form, Button } from 'react-bootstrap'
+import LoadSpinner from './Spinner'
+
 // import { create as ipfsHttpClient } from 'ipfs-http-client'
 
 import { Buffer } from 'buffer';
@@ -21,30 +23,34 @@ const Create = ({ marketplace, nft }) => {
   const [price, setPrice] = useState(null)
   const [name, 	setName] = useState('')
   const [description, setDescription] = useState('');
-
+  const [loading, setLoading] = useState(false);
 
 
 
   const uploadToIPFS = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
     const file = event.target.files[0]
     if (typeof file !== 'undefined') {
       try {
         const result = await client.add(file)
         console.log(result)
-        setImage(`https://ipfs.infura.io/ipfs/${result.path}`)
+        setImage(`https://ipfs.infura.io/ipfs/${result.path}`);
+        
       } catch (error){
         console.log("ipfs image upload error: ", error)
       }
     }
   }
   const createNFT = async () => {
+    setLoading(true);
     if (!image || !price || !name || !description) return
     try{
       const result = await client.add(JSON.stringify({image, price, name, description}))
-      mintThenList(result)
+      await mintThenList(result);
+      setLoading(false);
     } catch(error) {
       console.log("ipfs uri upload error: ", error)
+      setLoading(false);
     }
   }
   const mintThenList = async (result) => {
@@ -60,6 +66,7 @@ const Create = ({ marketplace, nft }) => {
     await(await marketplace.createItem(nft.address, id, listingPrice)).wait()
   }
   return (
+    !loading ? (
     <div className="container-fluid mt-5">
       <div className="row">
         <main role="main" className="col-lg-12 mx-auto" style={{ maxWidth: '1000px' }}>
@@ -84,6 +91,9 @@ const Create = ({ marketplace, nft }) => {
         </main>
       </div>
     </div>
+    ) : (
+      <LoadSpinner />
+    )
   );
 }
 
