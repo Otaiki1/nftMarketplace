@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { ethers } from "ethers"
-import { Row, Form, Button } from 'react-bootstrap'
-import LoadSpinner from './Spinner'
+import { useState, useEffect } from 'react';
+import { ethers } from "ethers";
+import { Row, Form, Button } from 'react-bootstrap';
+import LoadSpinner from './Spinner';
+import OrderStatus from './OrderStatus';
 
 // import { create as ipfsHttpClient } from 'ipfs-http-client'
 
@@ -18,22 +19,35 @@ const client = ipfsClient.create({
     authorization: auth,
   },
 });
+
+
+
 const Create = ({ marketplace, nft }) => {
   const [image, setImage] = useState('')
   const [price, setPrice] = useState(null)
   const [name, 	setName] = useState('')
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState(false);  
+  const [notCreated, setNotCreated] = useState(false);
+  const [fileUploadStatus, setFileUploadStatus] = useState("");
 
+  useEffect(() => {
+    if(created) setTimeout(() => setCreated(false), 7000);
+    if(notCreated) setTimeout(() => setNotCreated(false), 7000);
 
-
+  }, [created, notCreated])
+  
+  
   const uploadToIPFS = async (event) => {
     event.preventDefault();
     const file = event.target.files[0]
     if (typeof file !== 'undefined') {
       try {
+        setFileUploadStatus('Loading...')
         const result = await client.add(file)
         console.log(result)
+        setFileUploadStatus("The File has been uploaded to ipfs succesfully and the hash is "+ result.path)
         setImage(`https://ipfs.infura.io/ipfs/${result.path}`);
         
       } catch (error){
@@ -42,15 +56,18 @@ const Create = ({ marketplace, nft }) => {
     }
   }
   const createNFT = async () => {
+
     setLoading(true);
     if (!image || !price || !name || !description) return
     try{
       const result = await client.add(JSON.stringify({image, price, name, description}))
       await mintThenList(result);
       setLoading(false);
+      setCreated(true);
     } catch(error) {
       console.log("ipfs uri upload error: ", error)
       setLoading(false);
+      setNotCreated(true)
     }
   }
   const mintThenList = async (result) => {
@@ -78,6 +95,7 @@ const Create = ({ marketplace, nft }) => {
                 name="file"
                 onChange={uploadToIPFS}
               />
+              <p>{fileUploadStatus}</p>
               <Form.Control onChange={(e) => setName(e.target.value)} size="lg" required type="text" placeholder="Name" />
               <Form.Control onChange={(e) => setDescription(e.target.value)} size="lg" required as="textarea" placeholder="Description" />
               <Form.Control onChange={(e) => setPrice(e.target.value)} size="lg" required type="number" placeholder="Price in ETH" />
@@ -87,12 +105,15 @@ const Create = ({ marketplace, nft }) => {
                 </Button>
               </div>
             </Row>
+            {created ? <OrderStatus variant="success" info="create and list item Successful!!"/> : ''}
+            {notCreated ? <OrderStatus variant="danger" info="Failed to create and list items."/> : ''}
+
           </div>
         </main>
       </div>
     </div>
     ) : (
-      <LoadSpinner />
+      <LoadSpinner spinnerInfo="Awaiting Transaction"/>
     )
   );
 }

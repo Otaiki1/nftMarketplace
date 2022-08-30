@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
-import { Row, Col, Card, Button } from 'react-bootstrap'
+import { Row, Col, Card, Button, Alert } from 'react-bootstrap'
+import OrderStatus from './OrderStatus';
 
 export default function Home({marketplace, nft}){
     const[items, setItems] = useState([]);
     const[loading, setLoading] = useState(true);
+    const[bought, setBought] = useState(false);
+    const[failed, setFailed] = useState(false);
+
 
 
     const loadMarketplaceItems = async() => {
@@ -13,7 +17,7 @@ export default function Home({marketplace, nft}){
 
         for(let i=1; i<=itemCount; i++){
 
-            const item = await marketplace.items(1);
+            const item = await marketplace.items(i);
             if(!item.sold){
                 //get URI url from contract
                 const uri = await nft.tokenURI(item.tokenId);
@@ -37,14 +41,26 @@ export default function Home({marketplace, nft}){
     }
 
     const buyMarketItem = async(item) =>{
-        await (await marketplace.purchaseItem(item.itemId, {value: item.totalPrice})).wait();
-
-        //this calls the function and loads market items whenever the user buys items so it removes from list
-        loadMarketplaceItems();
+        try{
+          await (await marketplace.purchaseItem(item.itemId, {value: item.totalPrice})).wait();
+          setBought(true)
+          //this calls the function and loads market items whenever the user buys items so it removes from list
+          loadMarketplaceItems();
+        } catch(err){
+          setFailed(true);
+          loadMarketplaceItems();
+        }
     }
     useEffect(() => {
         loadMarketplaceItems();
     }, [])
+
+    useEffect(() => {
+      if(bought) setTimeout(() => setBought(false), 10000);
+      if(failed) setTimeout(() => setFailed(false), 10000);
+
+    }, [bought, failed])
+    
 
     if (loading) return (
         <main style={{ padding: "1rem 0" }}>
@@ -77,6 +93,8 @@ export default function Home({marketplace, nft}){
                   </Col>
                 ))}
               </Row>
+              {bought ? <OrderStatus variant="success" info="Purchase Successful!!"/> : ''} 
+              {failed ? <OrderStatus variant="danger" info="Purchase failed!!"/> : ''} 
             </div>
             : (
               <main style={{ padding: "1rem 0" }}>
@@ -86,3 +104,4 @@ export default function Home({marketplace, nft}){
         </div>
       );
 }
+
