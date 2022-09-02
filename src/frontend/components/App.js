@@ -15,6 +15,8 @@ import Home from "./Home";
 import Create from "./Create";
 import MyListedItem from "./MyListedItem";
 import MyPurchases from "./MyPurchases";
+import MyNfts from "./MyNfts";
+
 
 function App() {
   const [account, setAccount] = useState(null);
@@ -66,6 +68,9 @@ function App() {
           } />
           <Route path="/my-purchases" element={
             <MyPurchases marketplace={marketplace} nft={NFT} account={account} />
+          } />
+          <Route path="/my-nfts" element={
+            <MyNfts nft={NFT} account={account} />
           } />
       </Routes>
       )}
