@@ -61,7 +61,7 @@ const Create = ({ marketplace, nft }) => {
     if (!image || !price || !name || !description) return
     try{
       const result = await client.add(JSON.stringify({image, price, name, description}))
-      await mintThenList(result);
+      await mintNFT(result);
       setLoading(false);
       setCreated(true);
     } catch(error) {
@@ -70,17 +70,17 @@ const Create = ({ marketplace, nft }) => {
       setNotCreated(true)
     }
   }
-  const mintThenList = async (result) => {
+  const mintNFT = async (result) => {
     const uri = `https://ipfs.infura.io/ipfs/${result.path}`
     // mint nft 
-    await(await nft.mint(uri)).wait()
-    // get tokenId of new nft 
-    const id = await nft.tokenCount()
-    // approve marketplace to spend nft
-    await(await nft.setApprovalForAll(marketplace.address, true)).wait()
-    // add nft to marketplace
-    const listingPrice = ethers.utils.parseEther(price.toString())
-    await(await marketplace.createItem(nft.address, id, listingPrice)).wait()
+    await(await nft.mint(uri)).wait();
+    // // get tokenId of new nft 
+    // const id = await nft.tokenCount()
+    // // approve marketplace to spend nft
+    // await(await nft.setApprovalForAll(marketplace.address, true)).wait()
+    // // add nft to marketplace
+    // const listingPrice = ethers.utils.parseEther(price.toString())
+    // await(await marketplace.createItem(nft.address, id, listingPrice)).wait()
   }
   return (
     !loading ? (
@@ -101,12 +101,12 @@ const Create = ({ marketplace, nft }) => {
               <Form.Control onChange={(e) => setPrice(e.target.value)} size="lg" required type="number" placeholder="Price in ETH" />
               <div className="d-grid px-0">
                 <Button onClick={createNFT} variant="primary" size="lg">
-                  Create & List NFT!
+                  Create NFT!
                 </Button>
               </div>
             </Row>
-            {created ? <OrderStatus variant="success" info="create and list item Successful!!"/> : ''}
-            {notCreated ? <OrderStatus variant="danger" info="Failed to create and list items."/> : ''}
+            {created ? <OrderStatus variant="success" info="Successfully Created NFT!"/> : ''}
+            {notCreated ? <OrderStatus variant="danger" info="Failed to create NFT"/> : ''}
 
           </div>
         </main>
