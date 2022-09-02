@@ -52,6 +52,32 @@ describe("NFTMarketplace", async() =>{
             expect(await nft.balanceOf(addr2.address)).to.equal(1);
             expect(await nft.tokenURI(2)).to.equal(URI);
         })
+        it("Should return a list of id of minted nfts", async() => {
+            //addr1 mints first nft
+            await nft.connect(addr1).mint(URI);
+            //addr2 mints second and third nfts
+            await nft.connect(addr2).mint(URI);
+            await nft.connect(addr2).mint(URI);
+            //addr1 mints fourth nft
+            await nft.connect(addr1).mint(URI);
+            
+            let addr1NftValue = await nft.getNftList(addr1.address)
+            let addr2NftValue = await nft.getNftList(addr2.address)
+
+            addr1NftValue = addr1NftValue.map(nftId => ethers.utils.arrayify(nftId._hex)[0])
+            addr2NftValue = addr2NftValue.map(nftId => ethers.utils.arrayify(nftId._hex)[0])
+            
+            //check if the length of nft list is equal
+            expect(addr1NftValue.length).to.equal(2);
+            expect(addr2NftValue.length).to.equal(2);
+            
+            //check ifthe array values are corrrect
+            expect(addr1NftValue[0]).to.equal(1);
+            expect(addr1NftValue[1]).to.equal(4);
+            expect(addr2NftValue[0]).to.equal(2);
+            expect(addr2NftValue[1]).to.equal(3);
+            
+        })
     })
     describe("Making marketplace items", () => {
         beforeEach(async() => {
