@@ -24,7 +24,6 @@ const client = ipfsClient.create({
 
 const Create = ({ marketplace, nft }) => {
   const [image, setImage] = useState('')
-  const [price, setPrice] = useState(null)
   const [name, 	setName] = useState('')
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,7 +47,7 @@ const Create = ({ marketplace, nft }) => {
         const result = await client.add(file)
         console.log(result)
         setFileUploadStatus("The File has been uploaded to ipfs succesfully and the hash is "+ result.path)
-        setImage(`https://ipfs.infura.io/ipfs/${result.path}`);
+        setImage(`https://ipfs.io/ipfs/${result.path}`);
         
       } catch (error){
         console.log("ipfs image upload error: ", error)
@@ -58,9 +57,9 @@ const Create = ({ marketplace, nft }) => {
   const createNFT = async () => {
 
     setLoading(true);
-    if (!image || !price || !name || !description) return
+    if (!image || !name || !description) return
     try{
-      const result = await client.add(JSON.stringify({image, price, name, description}))
+      const result = await client.add(JSON.stringify({image, name, description}))
       await mintNFT(result);
       setLoading(false);
       setCreated(true);
@@ -71,7 +70,7 @@ const Create = ({ marketplace, nft }) => {
     }
   }
   const mintNFT = async (result) => {
-    const uri = `https://ipfs.infura.io/ipfs/${result.path}`
+    const uri = `https://ipfs.io/ipfs/${result.path}`
     // mint nft 
     await(await nft.mint(uri)).wait();
     // // get tokenId of new nft 
@@ -98,10 +97,9 @@ const Create = ({ marketplace, nft }) => {
               <p>{fileUploadStatus}</p>
               <Form.Control onChange={(e) => setName(e.target.value)} size="lg" required type="text" placeholder="Name" />
               <Form.Control onChange={(e) => setDescription(e.target.value)} size="lg" required as="textarea" placeholder="Description" />
-              <Form.Control onChange={(e) => setPrice(e.target.value)} size="lg" required type="number" placeholder="Price in ETH" />
               <div className="d-grid px-0">
                 <Button onClick={createNFT} variant="primary" size="lg">
-                  Create NFT!
+                  Mint NFT!
                 </Button>
               </div>
             </Row>
