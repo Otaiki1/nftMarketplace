@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
 import { Row, Col, Card, Button } from 'react-bootstrap'
+import ModalComp from './ModalComp';
 
 // function renderSoldItems(items) {
 //   return (
@@ -25,7 +26,9 @@ import { Row, Col, Card, Button } from 'react-bootstrap'
 export default function MyNfts({ nft, account }) {
   const [loading, setLoading] = useState(true)
   const[userNfts, setUserNfts] = useState([]);
+  const[showModal, setShowModal] = useState(false)
   
+  const handleClose = () => setShowModal(false);
 
   const loadListedItems = async () => {
     // Load all ids of the items that the user minted
@@ -77,10 +80,11 @@ export default function MyNfts({ nft, account }) {
                           {item.description}
                         </Card.Text>
                   </Card.Body>
-                  <Card.Footer><Button variant="primary">List on Marketplace </Button></Card.Footer>
+                  <Card.Footer><Button variant="primary" onClick={() => setShowModal(true)}>List on Marketplace </Button></Card.Footer>
                 </Card>
               </Col>
             ))}
+            {showModal ? <ModalComp show="showModal" onHide={handleClose}/> :""}
           </Row>
             {/* {soldItems.length > 0 && renderSoldItems(soldItems)} */}
         </div>
