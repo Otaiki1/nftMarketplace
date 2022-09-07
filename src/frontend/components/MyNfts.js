@@ -23,12 +23,18 @@ import ModalComp from './ModalComp';
 //   )
 // }
 
-export default function MyNfts({ nft, account }) {
+export default function MyNfts({ nft, account, marketplace }) {
   const [loading, setLoading] = useState(true)
   const[userNfts, setUserNfts] = useState([]);
   const[showModal, setShowModal] = useState(false)
+  const[itemId, setItemId] = useState();
   
   const handleClose = () => setShowModal(false);
+
+  const handleModal = (currentItem) => {
+    setShowModal(true);
+    setItemId(currentItem.id)
+  }
 
   const loadListedItems = async () => {
     // Load all ids of the items that the user minted
@@ -49,7 +55,8 @@ export default function MyNfts({ nft, account }) {
         let item = {
                 name: metadata.name,
                 description: metadata.description,
-                image: metadata.image
+                image: metadata.image,
+                id: id
               }
         nftList.push(item);
     }
@@ -80,11 +87,11 @@ export default function MyNfts({ nft, account }) {
                           {item.description}
                         </Card.Text>
                   </Card.Body>
-                  <Card.Footer><Button variant="primary" onClick={() => setShowModal(true)}>List on Marketplace </Button></Card.Footer>
+                  <Card.Footer><Button variant="primary" onClick={() => handleModal(item)}>List on Marketplace </Button></Card.Footer>
                 </Card>
               </Col>
             ))}
-            {showModal ? <ModalComp show="showModal" onHide={handleClose}/> :""}
+            {showModal ? <ModalComp show="showModal" onHide={handleClose} itemId={itemId} nft={nft} marketplace={marketplace}/> :""}
           </Row>
             {/* {soldItems.length > 0 && renderSoldItems(soldItems)} */}
         </div>

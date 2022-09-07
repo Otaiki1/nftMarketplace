@@ -70,7 +70,7 @@ function App() {
             <MyPurchases marketplace={marketplace} nft={NFT} account={account} />
           } />
           <Route path="/my-nfts" element={
-            <MyNfts nft={NFT} account={account} />
+            <MyNfts nft={NFT} account={account} marketplace={marketplace}/>
           } />
       </Routes>
       )}

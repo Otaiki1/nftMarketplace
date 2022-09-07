@@ -73,13 +73,6 @@ const Create = ({ marketplace, nft }) => {
     const uri = `https://ipfs.io/ipfs/${result.path}`
     // mint nft 
     await(await nft.mint(uri)).wait();
-    // // get tokenId of new nft 
-    // const id = await nft.tokenCount()
-    // // approve marketplace to spend nft
-    // await(await nft.setApprovalForAll(marketplace.address, true)).wait()
-    // // add nft to marketplace
-    // const listingPrice = ethers.utils.parseEther(price.toString())
-    // await(await marketplace.createItem(nft.address, id, listingPrice)).wait()
   }
   return (
     !loading ? (
