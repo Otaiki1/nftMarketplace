@@ -78,6 +78,26 @@ describe("NFTMarketplace", async() =>{
             expect(addr2NftValue[1]).to.equal(3);
             
         })
+        it("Should update Nft id  list on successful purchase", async() => {
+              //addr1 mints an nft
+              await nft.connect(addr1).mint(URI);
+              //addr1 approves marketplace to spend nft
+              await nft.connect(addr1).setApprovalForAll(marketplace.address, true)
+              //addr1 offers their nft at a price of 1 ether
+              await marketplace.connect(addr1).createItem(nft.address, 1, toWei(1))
+            //fetch total price for the item
+              let totalPriceInWei = await marketplace.getTotalPrice(1);
+              //addr2 purchases1 nft and the update function is called
+              //addr2 buys the item
+              await marketplace.connect(addr2).purchaseItem(1, {value: totalPriceInWei})
+              await nft.connect(addr2).updateNftList(addr1.address, 0, 1)
+
+							let nftList1 = await nft.getNftList(addr1.address);
+							let nftList2 = await nft.getNftList(addr2.address)
+
+              await expect(nftList1.length).to.equal(0);
+              await expect(nftList2.length).to.equal(1)
+        })
     })
     describe("Making marketplace items", () => {
         beforeEach(async() => {
