@@ -53,9 +53,9 @@ export default function MyNfts({ nft, account, marketplace }) {
          const metadata = await response.json();
         console.log("metadata is ___----___", metadata)
         let item = {
-                name: metadata.name,
-                description: metadata.description,
-                image: metadata.image,
+                name:metadata.name,
+                description:metadata.description,
+                image:metadata.image,
                 id: id
               }
         nftList.push(item);
@@ -65,7 +65,7 @@ export default function MyNfts({ nft, account, marketplace }) {
   }
   useEffect(() => {
     loadListedItems()
-  }, [])
+  }, [showModal])
   if (loading) return (
     <main style={{ padding: "1rem 0" }}>
       <h2>Loading...</h2>

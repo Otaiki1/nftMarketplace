@@ -47,7 +47,7 @@ const Create = ({ marketplace, nft }) => {
         const result = await client.add(file)
         console.log(result)
         setFileUploadStatus("The File has been uploaded to ipfs succesfully and the hash is "+ result.path)
-        setImage(`https://ipfs.io/ipfs/${result.path}`);
+        setImage(`https://infura-ipfs.io/ipfs/${result.path}`);
         
       } catch (error){
         console.log("ipfs image upload error: ", error)
@@ -70,7 +70,7 @@ const Create = ({ marketplace, nft }) => {
     }
   }
   const mintNFT = async (result) => {
-    const uri = `https://ipfs.io/ipfs/${result.path}`
+    const uri = `https://infura-ipfs.io/ipfs/${result.path}`
     // mint nft 
     await(await nft.mint(uri)).wait();
   }

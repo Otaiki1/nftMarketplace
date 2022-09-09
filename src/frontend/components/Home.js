@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
-import { Row, Col, Card, Button, Alert } from 'react-bootstrap'
+import { Row, Col, Card, Button} from 'react-bootstrap'
 import OrderStatus from './OrderStatus';
 
 export default function Home({marketplace, nft}){
@@ -42,7 +42,13 @@ export default function Home({marketplace, nft}){
 
     const buyMarketItem = async(item) =>{
         try{
+          let sellerAddress = item.seller;
+          let itemArray = await nft.getNftList(sellerAddress);
+          const itemIds = itemArray.map(id => ethers.utils.arrayify(id._hex)[0]);
+          let index = itemIds.indexOf(item.itemId);
+  
           await (await marketplace.purchaseItem(item.itemId, {value: item.totalPrice})).wait();
+          await (await nft.updateNftList(sellerAddress, index, item.itemId)).wait();
           setBought(true)
           //this calls the function and loads market items whenever the user buys items so it removes from list
           loadMarketplaceItems();
@@ -53,7 +59,7 @@ export default function Home({marketplace, nft}){
     }
     useEffect(() => {
         loadMarketplaceItems();
-    }, [])
+    }, [bought, failed])
 
     useEffect(() => {
       if(bought) setTimeout(() => setBought(false), 10000);
